@@ -146,6 +146,7 @@
     <ClCompile Include="MonitoringServer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommonProtocol.h" />
     <ClInclude Include="MonitoringServer.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

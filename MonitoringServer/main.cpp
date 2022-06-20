@@ -3,13 +3,11 @@
 #include "stdafx.h"
 #include "MonitoringServer.h"
 
-CMonitoringServer server;
-CTest client;
+CMonitorServer server;
 
 int main()
 {
     server.Init();
-    client.Init();
 
     for (;;) {
         //Sleep(1);
