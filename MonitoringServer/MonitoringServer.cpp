@@ -5,6 +5,8 @@
 _itow_s(value, buffer, 10); \
 WritePrivateProfileString(section, key, buffer, fileName)
 
+char password[] = "ajfw@!cv980dSZ[fje#@fdj123948djf";
+
 void SCMonitor::Init()
 {
 	WCHAR IP[16];
@@ -54,7 +56,7 @@ bool SCMonitor::OnConnectionRequest(WCHAR* IP, DWORD Port)
 bool SCMonitor::OnClientJoin(DWORD64 sessionID)
 {
 	_LOG(LOG_LEVEL_DEBUG, L"Joined to Server");
-
+	SetTimeOut(sessionID, INFINITE);
 	return true;
 }
 
@@ -65,16 +67,22 @@ bool SCMonitor::OnClientLeave(DWORD64 sessionID)
 
 void SCMonitor::OnRecv(DWORD64 sessionID, CPacket* packet)
 {
-	int cnt;
-	CPacket* sendMsg = PacketAlloc();
-	*packet >> cnt;
+	WORD type;
+	*packet >> type;
 
-	_LOG(LOG_LEVEL_DEBUG, L"Server Recvd %d", cnt);
-
+	switch (type) {
+	case en_PACKET_CS_MONITOR_TOOL_REQ_LOGIN:
+	{
+		_LOG(LOG_LEVEL_DEBUG, L"Req_Login");
+		Recv_Login(sessionID, packet);
+	}
+	break;
+	
+	default:
+		_LOG(LOG_LEVEL_DEBUG, L"On Recv Default Triggered");
+		Disconnect(sessionID);
+	}
 	PacketFree(packet);
-
-	*sendMsg << cnt;
-	SendPacket(sessionID, sendMsg);
 }
 
 void SCMonitor::OnError(int error, const WCHAR* msg)
@@ -89,11 +97,57 @@ void SCMonitor::OnTimeOut(DWORD64 sessionID, int reason)
 {
 }
 
+void SCMonitor::Recv_Login(DWORD64 sessionID, CPacket* packet)
+{
+	char code[33] = { 0 };
+	packet->GetData(code, 32);
+
+	if (packet->GetDataSize() > 0) {
+		_LOG(LOG_LEVEL_DEBUG, L"packet left");
+		Disconnect(sessionID);
+		return;
+	}
+
+	if (strcmp(password, code) != 0) {
+		_LOG(LOG_LEVEL_DEBUG, L"login code diff");
+		Res_Login(sessionID, dfMONITOR_TOOL_LOGIN_ERR_SESSIONKEY);
+		Disconnect(sessionID);
+		return;
+	}
+
+	Res_Login(sessionID, dfMONITOR_TOOL_LOGIN_OK);
+}
+
+void SCMonitor::Res_Login(DWORD64 sessionID, BYTE res)
+{
+	CPacket* packet = PacketAlloc();
+	constexpr WORD type = en_PACKET_CS_MONITOR_TOOL_RES_LOGIN;
+
+	*packet << type << res;
+
+	SendPacket(sessionID, packet);
+}
+
 
 void CMonitorServer::Init()
 {
 	netServer.Init();
+	netServer.master = this;
 	lanServer.Init();
+	lanServer.master = this;
+}
+
+void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)
+{
+	CPacket* sendMsg = netServer.PacketAlloc();
+	constexpr WORD type = en_PACKET_CS_MONITOR_TOOL_DATA_UPDATE;
+	int len = packet->GetDataSize();
+
+	*sendMsg << type << serverID;
+	packet->GetData(sendMsg->GetWritePtr(), len);
+	sendMsg->MoveWritePos(len);
+
+	netServer.SendPacketToAll(sendMsg);
 }
 
 void SSMonitor::Init()
@@ -135,12 +189,12 @@ void SSMonitor::Init()
 
 bool SSMonitor::OnConnectionRequest(WCHAR* IP, DWORD Port)
 {
-	return false;
+	return true;
 }
 
 bool SSMonitor::OnClientJoin(DWORD64 sessionID)
 {
-	return false;
+	return true;
 }
 
 bool SSMonitor::OnClientLeave(DWORD64 sessionID)
@@ -150,6 +204,29 @@ bool SSMonitor::OnClientLeave(DWORD64 sessionID)
 
 void SSMonitor::OnRecv(DWORD64 sessionID, CPacket* packet)
 {
+	WORD type;
+	*packet >> type;
+	int serverID;
+
+	switch (type) 
+	{
+	case en_PACKET_SS_MONITOR_LOGIN: 
+	{
+		*packet >> serverID;
+		serverMap[sessionID] = serverID;
+	}
+	break;
+	case en_PACKET_SS_MONITOR_DATA_UPDATE:
+	{
+		master->LanToNet(serverMap[sessionID], packet);
+	}
+	break;
+
+	default:
+		Disconnect(sessionID);
+
+	}
+	PacketFree(packet);
 }
 
 void SSMonitor::OnError(int error, const WCHAR* msg)

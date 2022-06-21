@@ -6,6 +6,8 @@
 
 #include <MSWSock.h>
 
+#include "CommonProtocol.h"
+
 #include "include/Dump.h"
 #include "include/ErrorReason.h"
 #include "include/LockFreeMemoryPool.h"

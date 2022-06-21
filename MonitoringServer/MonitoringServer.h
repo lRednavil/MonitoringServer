@@ -1,5 +1,9 @@
 #pragma once
 
+#include <unordered_map>
+
+class CMonitorServer;
+
 class SCMonitor : public CNetServer
 {
 public:
@@ -20,6 +24,14 @@ public:
 	virtual void OnStop();
 
 	virtual void OnTimeOut(DWORD64 sessionID, int reason);
+
+private:
+	void Recv_Login(DWORD64 sessionID, CPacket* packet);
+	void Res_Login(DWORD64 sessionID, BYTE res);
+
+private:
+	friend class CMonitorServer;
+	CMonitorServer* master;
 };
 
 class SSMonitor : public CLanServer
@@ -41,16 +53,19 @@ public:
 
 	virtual void OnStop();
 
+private:
+	friend class CMonitorServer;
+	std::unordered_map<DWORD64, BYTE> serverMap;
+	CMonitorServer* master;
 };
 
 class CMonitorServer {
 public:
 	void Init();
-
-	void SendThrough(CPacket* packet);
+	//lan에서 패킷 작성 혹은 토스
+	void LanToNet(BYTE serverID, CPacket* packet);
 
 private:
 	SCMonitor netServer;
 	SSMonitor lanServer;
-
 };
