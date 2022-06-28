@@ -131,7 +131,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -142,13 +142,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DBConnector.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MonitoringServer.cpp" />
+    <ClCompile Include="TLSDBConnector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonProtocol.h" />
+    <ClInclude Include="DBConnector.h" />
     <ClInclude Include="MonitoringServer.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TLSDBConnector.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

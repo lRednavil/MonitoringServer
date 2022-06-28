@@ -24,4 +24,5 @@
 #pragma comment (lib, "WS2_32")
 #pragma comment (lib, "NetworkLibrary")
 #pragma comment (lib, "Winmm")
+#pragma comment (lib, "mysqlclient")
 
