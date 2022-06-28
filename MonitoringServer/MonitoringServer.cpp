@@ -151,6 +151,8 @@ void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)
 	sendMsg->MoveWritePos(len);
 
 	netServer.SendPacketToAll(sendMsg);
+
+
 }
 
 void SSMonitor::Init()

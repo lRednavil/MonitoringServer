@@ -65,6 +65,8 @@ public:
 	//lan에서 패킷 작성 혹은 토스
 	void LanToNet(BYTE serverID, CPacket* packet);
 
+private:
+	void SendToDB();
 	
 
 private:
