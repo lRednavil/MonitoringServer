@@ -53,26 +53,20 @@ void CDBConnector::Disconnect()
 	mysql_close(connection);
 }
 
-bool CDBConnector::SelectQuery(char* query)
+int CDBConnector::SelectQuery(char* query)
 {
 	DWORD startTime = timeGetTime();
 	DWORD endTime;
+	int ret = 0;
 	mysql_query(connection, query);
 
 	if (query_stat != 0)
 	{
+		ret = mysql_errno(&conn);
 		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %S \n", mysql_error(&conn));
-		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %d \n", mysql_errno(&conn));
+		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %d \n", ret);
 
-		//connection = mysql_real_connect(&conn, "127.0.0.1", "root", "root", "test", 3306, (char*)NULL, 0);
-		//if (connection == NULL)
-		//{
-		//	//wprintf_s(L"Mysql connection error : %s \n", mysql_error(&conn));
-		//}
-		//else {
-		//	wprintf_s(L"Mysql Reconnected \n");
-		//}
-		return false;
+		return ret;
 	}
 
 	sql_result = mysql_store_result(connection);
@@ -83,20 +77,21 @@ bool CDBConnector::SelectQuery(char* query)
 		_FILE_LOG(LOG_LEVEL_ERROR, L"QueryLog", L"Query Time Over : Time -> %ums, Query -> %S", endTime - startTime, query);
 	}
 
-	return true;
+	return ret;
 }
 
-bool CDBConnector::SaveQuery(char* query)
+int CDBConnector::SaveQuery(char* query)
 {
 	
 	DWORD startTime = timeGetTime();
 	DWORD endTime;
+	int ret = 0;
 	mysql_query(connection, query);
 
 	if (query_stat != 0)
 	{
 		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %S \n", mysql_error(&conn));
-		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %d \n", mysql_errno(&conn));
+		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %d \n", ret);
 
 		//connection = mysql_real_connect(&conn, "127.0.0.1", "root", "root", "test", 3306, (char*)NULL, 0);
 		//if (connection == NULL)
@@ -106,7 +101,7 @@ bool CDBConnector::SaveQuery(char* query)
 		//else {
 		//	wprintf_s(L"Mysql Reconnected \n");
 		//}
-		return false;
+		return ret;
 	}
 
 	//시간 초과시 로깅
@@ -115,7 +110,7 @@ bool CDBConnector::SaveQuery(char* query)
 		_FILE_LOG(LOG_LEVEL_ERROR, L"QueryLog", L"Query Time Over : Time -> %ums, Query -> %S", endTime - startTime, query);
 	}
 	
-	return true;
+	return ret;
 }
 
 MYSQL_ROW CDBConnector::FetchRow()

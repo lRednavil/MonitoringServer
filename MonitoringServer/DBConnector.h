@@ -15,8 +15,8 @@ public:
 	bool ConnectToDB();
 	void Disconnect();
 
-	bool SelectQuery(char* query);
-	bool SaveQuery(char* query);
+	int SelectQuery(char* query);
+	int SaveQuery(char* query);
 	
 	MYSQL_ROW FetchRow();
 	void ResultFree();

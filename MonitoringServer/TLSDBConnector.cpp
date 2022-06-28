@@ -5,7 +5,7 @@
 #define TIME_LIMIT 5
 
 
-CTLSDBConnector::CTLSDBConnector(char* IP, char* user, char* password, unsigned int port, char* schema)
+CTLSDBConnector::CTLSDBConnector(const char* IP, const char* user, const char* password, const unsigned int port, const char* schema)
 {
 	memmove_s(this->IP, 16, IP, 16);
 	memmove_s(this->user, 32, user, 32);
@@ -44,7 +44,7 @@ void CTLSDBConnector::Disconnect()
 	delete db;
 }
 
-bool CTLSDBConnector::SelectQuery(char* query)
+int CTLSDBConnector::SelectQuery(char* query)
 {
 	CDBConnector* db = (CDBConnector*)TlsGetValue(tlsIdx);
 	if (db == NULL) {
@@ -55,7 +55,7 @@ bool CTLSDBConnector::SelectQuery(char* query)
 	return db->SelectQuery(query);
 }
 
-bool CTLSDBConnector::SaveQuery(char* query)
+int CTLSDBConnector::SaveQuery(char* query)
 {
 	CDBConnector* db = (CDBConnector*)TlsGetValue(tlsIdx);
 	if (db == NULL) {

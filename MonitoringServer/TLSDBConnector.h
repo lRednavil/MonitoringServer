@@ -8,14 +8,14 @@
 class CTLSDBConnector
 {
 public:
-	CTLSDBConnector(char* IP, char* user, char* password, unsigned int port, char* schema);
+	CTLSDBConnector(const char* IP, const char* user, const char* password, const unsigned int port, const char* schema);
 	~CTLSDBConnector();
 
 	bool ConnectToDB();
 	void Disconnect();
 
-	bool SelectQuery(char* query);
-	bool SaveQuery(char* query);
+	int SelectQuery(char* query);
+	int SaveQuery(char* query);
 
 	MYSQL_ROW FetchRow();
 	void ResultFree();

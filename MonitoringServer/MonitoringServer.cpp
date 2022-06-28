@@ -135,6 +135,9 @@ void CMonitorServer::Init()
 	netServer.master = this;
 	lanServer.Init();
 	lanServer.master = this;
+
+	db = new CTLSDBConnector("10.0.2.2", "root", "root", 3306, "logdb");
+	
 }
 
 void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)

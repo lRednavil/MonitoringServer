@@ -21,6 +21,8 @@
 #include "include/LanServer.h"
 #include "include/NetServer.h"
 
+#include "TLSDBConnector.h"
+
 #pragma comment (lib, "WS2_32")
 #pragma comment (lib, "NetworkLibrary")
 #pragma comment (lib, "Winmm")

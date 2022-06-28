@@ -70,5 +70,5 @@ public:
 private:
 	SCMonitor netServer;
 	SSMonitor lanServer;
-	HANDLE hDB;
+	CTLSDBConnector* db;
 };
