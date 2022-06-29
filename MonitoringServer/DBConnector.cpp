@@ -58,13 +58,15 @@ int CDBConnector::SelectQuery(char* query)
 	DWORD startTime = timeGetTime();
 	DWORD endTime;
 	int ret = 0;
-	mysql_query(connection, query);
+	query_stat = mysql_query(connection, query);
 
 	if (query_stat != 0)
 	{
 		ret = mysql_errno(&conn);
 		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %S \n", mysql_error(&conn));
 		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %d \n", ret);
+		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query : %S \n", query);
+
 
 		return ret;
 	}
@@ -86,12 +88,14 @@ int CDBConnector::SaveQuery(char* query)
 	DWORD startTime = timeGetTime();
 	DWORD endTime;
 	int ret = 0;
-	mysql_query(connection, query);
+	query_stat = mysql_query(connection, query);
 
 	if (query_stat != 0)
 	{
+		ret = mysql_errno(&conn);
 		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %S \n", mysql_error(&conn));
 		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query error : %d \n", ret);
+		_FILE_LOG(LOG_LEVEL_ERROR, L"DB_Error_Log", L"Mysql query : %S \n", query);
 
 		//connection = mysql_real_connect(&conn, "127.0.0.1", "root", "root", "test", 3306, (char*)NULL, 0);
 		//if (connection == NULL)

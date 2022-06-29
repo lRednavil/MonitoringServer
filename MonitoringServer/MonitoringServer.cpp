@@ -140,7 +140,7 @@ void CMonitorServer::Init()
 
 	db->ConnectToDB();
 
-	memset(monitorMax, 0xff, sizeof(monitorMax));
+	memset(monitorMin, 0xff, sizeof(monitorMax));
 }
 
 void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)
@@ -149,16 +149,15 @@ void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)
 	constexpr WORD type = en_PACKET_CS_MONITOR_TOOL_DATA_UPDATE;
 	int len = packet->GetDataSize();
 
-	BYTE serverNo;
 	BYTE dataType;
 	int dataVal;
 	int timeVal;
 
-	*packet >> serverNo >> dataType >> dataVal >> timeVal;
+	*packet >> dataType >> dataVal >> timeVal;
 
 	*sendMsg << type << serverID << dataType << dataVal << timeVal;
 
-	SaveValue(serverNo, dataType, dataVal);
+	SaveValue(serverID, dataType, dataVal);
 
 	netServer.SendPacketToAll(sendMsg);
 }
@@ -177,8 +176,10 @@ void CMonitorServer::SendToDB()
 	time_t tv;
 
 	char tableName[64];
-	char query[256];
+	char query[512];
 	char tablequery[256];
+
+	int ret;
 
 	time(&tv);
 	localtime_s(&timeVal, &tv);
@@ -188,13 +189,16 @@ void CMonitorServer::SendToDB()
 	for (int type = 0; type < dfMONITOR_DATA_END; type++) {
 		if (monitorCnt[type] == 0) continue;
 
-		sprintf_s(query, "INSERT INTO `%s` (`logtime`, `serverno`, `servername`, `type`, `avr`, `min`, `max`) VALUES (NOW(), %d, %s, %d, %lld, %lld, %lld)", tableName, 1, "Server",
+		sprintf_s(query, "INSERT INTO `%s` (`logtime`, `serverno`, `servername`, `type`, `avr`, `min`, `max`) VALUES (NOW(), %d, \"%s\", %d, %lld, %llu, %llu)", tableName, 1, "Server",
 			type, monitorTot[type] / monitorCnt[type], monitorMin[type], monitorMax[type]);
 			
-		if (db->SaveQuery(query) == 1146) {
+		ret = db->SaveQuery(query);
+		if (ret == 1146) {
 			sprintf_s(tablequery, "CREATE TABLE `%s` LIKE `monitorlog_template`", tableName);
+			db->SaveQuery(tablequery);
 			db->SaveQuery(query);
 		}
+	
 	}
 }
 

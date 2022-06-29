@@ -10,7 +10,7 @@ int main()
     server.Init();
 
     for (;;) {
-        Sleep(1000);
+        Sleep(60000);
         server.SendToDB();
     }
 
