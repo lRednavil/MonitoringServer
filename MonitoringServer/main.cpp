@@ -11,9 +11,7 @@ int main()
 
     for (;;) {
         Sleep(1000);
-        //CPacket* packet = server.PacketAlloc();
-        //*packet << (WORD)en_PACKET_CS_MONITOR_TOOL_DATA_UPDATE << (BYTE)0 << (BYTE)dfMONITOR_DATA_TYPE_CHAT_SERVER_RUN << 1 << (int)time(NULL);
-        //server.LanToNet(packet);
+        server.SendToDB();
     }
 
     Sleep(INFINITE);

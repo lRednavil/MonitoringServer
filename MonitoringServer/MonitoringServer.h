@@ -64,13 +64,19 @@ public:
 	void Init();
 	//lan에서 패킷 작성 혹은 토스
 	void LanToNet(BYTE serverID, CPacket* packet);
+	void SendToDB();
 
 private:
-	void SendToDB();
+	void SaveValue(BYTE serverNo, BYTE dataType, int dataVal);
 	
 
 private:
 	SCMonitor netServer;
 	SSMonitor lanServer;
 	CTLSDBConnector* db;
+
+	DWORD64 monitorCnt[dfMONITOR_DATA_END];
+	DWORD64 monitorTot[dfMONITOR_DATA_END];
+	DWORD64 monitorMin[dfMONITOR_DATA_END];
+	DWORD64 monitorMax[dfMONITOR_DATA_END];
 };

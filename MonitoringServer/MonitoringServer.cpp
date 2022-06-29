@@ -137,7 +137,10 @@ void CMonitorServer::Init()
 	lanServer.master = this;
 
 	db = new CTLSDBConnector("10.0.2.2", "root", "root", 3306, "logdb");
-	
+
+	db->ConnectToDB();
+
+	memset(monitorMax, 0xff, sizeof(monitorMax));
 }
 
 void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)
@@ -146,14 +149,55 @@ void CMonitorServer::LanToNet(BYTE serverID, CPacket* packet)
 	constexpr WORD type = en_PACKET_CS_MONITOR_TOOL_DATA_UPDATE;
 	int len = packet->GetDataSize();
 
-	*sendMsg << type << serverID;
-	packet->GetData(sendMsg->GetWritePtr(), len);
-	sendMsg->MoveWritePos(len);
+	BYTE serverNo;
+	BYTE dataType;
+	int dataVal;
+	int timeVal;
+
+	*packet >> serverNo >> dataType >> dataVal >> timeVal;
+
+	*sendMsg << type << serverID << dataType << dataVal << timeVal;
+
+	SaveValue(serverNo, dataType, dataVal);
 
 	netServer.SendPacketToAll(sendMsg);
-
-
 }
+
+void CMonitorServer::SaveValue(BYTE serverNo, BYTE dataType, int dataVal)
+{
+	monitorCnt[dataType]++;
+	monitorTot[dataType] += dataVal;
+	monitorMin[dataType] = min(dataVal, monitorMin[dataType]);
+	monitorMax[dataType] = max(dataVal, monitorMax[dataType]);
+}
+
+void CMonitorServer::SendToDB()
+{
+	tm timeVal;
+	time_t tv;
+
+	char tableName[64];
+	char query[256];
+	char tablequery[256];
+
+	time(&tv);
+	localtime_s(&timeVal, &tv);
+
+	sprintf_s(tableName, "monitorLog_%d%d", timeVal.tm_year + 1900, timeVal.tm_mon + 1);
+
+	for (int type = 0; type < dfMONITOR_DATA_END; type++) {
+		if (monitorCnt[type] == 0) continue;
+
+		sprintf_s(query, "INSERT INTO `%s` (`logtime`, `serverno`, `servername`, `type`, `avr`, `min`, `max`) VALUES (NOW(), %d, %s, %d, %lld, %lld, %lld)", tableName, 1, "Server",
+			type, monitorTot[type] / monitorCnt[type], monitorMin[type], monitorMax[type]);
+			
+		if (db->SaveQuery(query) == 1146) {
+			sprintf_s(tablequery, "CREATE TABLE `%s` LIKE `monitorlog_template`", tableName);
+			db->SaveQuery(query);
+		}
+	}
+}
+
 
 void SSMonitor::Init()
 {

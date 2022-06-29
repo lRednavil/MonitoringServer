@@ -13,8 +13,6 @@ public:
 	void Stop();
 
 	int GetSessionCount();
-	//모니터링용 함수
-	void Monitor();
 
 	bool Disconnect(DWORD64 sessionID);
 	bool SendPacket(DWORD64 sessionID, CPacket* packet);
@@ -28,8 +26,13 @@ public:
 	//기본 참조카운트 1부여 및 초기화 실행
 	CPacket* PacketAlloc();
 	void	PacketFree(CPacket* packet);
+	int		GetPacketPoolCapacity();
+	int		GetPacketPoolUse();
 
 	void SetTimeOut(DWORD64 sessionID, DWORD timeVal, bool recvTimeReset = false);
+
+	DWORD64 GetTotalAccept();
+	DWORD64 GetAcceptTPS();
 
 	//시동함수 작성용
 	virtual void Init() = 0;
@@ -91,22 +94,12 @@ private:
 	void RecvProc(SESSION* session);
 	bool RecvPost(SESSION* session);
 	bool SendPost(SESSION* session);
-	
+
 protected:
 	//sessionID 겸용
 	DWORD64 totalAccept = 0;
-	alignas(64)
-	DWORD64 totalSend = 0;
-	alignas(64)
-	DWORD64 totalRecv = 0;
 	//tps측정용 기억
-	alignas(64)
 	DWORD64 lastAccept = 0;
-	DWORD64 lastSend = 0;
-	DWORD64 lastRecv = 0;
-
-	DWORD64 recvBytes = 0;
-	DWORD64 sendBytes = 0;
 
 	//시간 기억
 	DWORD currentTime;
