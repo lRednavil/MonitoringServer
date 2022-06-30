@@ -49,14 +49,14 @@ void SCMonitor::Init()
 
 bool SCMonitor::OnConnectionRequest(WCHAR* IP, DWORD Port)
 {
-	_LOG(LOG_LEVEL_DEBUG, L"Request From %s :: %d", IP, Port);
+	_LOG(LOG_LEVEL_SYSTEM, L"Request From %s :: %d", IP, Port);
 	return true;
 }
 
 bool SCMonitor::OnClientJoin(DWORD64 sessionID)
 {
-	_LOG(LOG_LEVEL_DEBUG, L"Joined to Server");
-	SetTimeOut(sessionID, INFINITE);
+	_LOG(LOG_LEVEL_SYSTEM, L"Joined to Server");
+	SetTimeOut(sessionID, 120000);
 	return true;
 }
 
@@ -73,13 +73,11 @@ void SCMonitor::OnRecv(DWORD64 sessionID, CPacket* packet)
 	switch (type) {
 	case en_PACKET_CS_MONITOR_TOOL_REQ_LOGIN:
 	{
-		_LOG(LOG_LEVEL_DEBUG, L"Req_Login");
 		Recv_Login(sessionID, packet);
 	}
 	break;
 	
 	default:
-		_LOG(LOG_LEVEL_DEBUG, L"On Recv Default Triggered");
 		Disconnect(sessionID);
 	}
 	PacketFree(packet);
@@ -197,6 +195,9 @@ void CMonitorServer::SendToDB()
 			sprintf_s(tablequery, "CREATE TABLE `%s` LIKE `monitorlog_template`", tableName);
 			db->SaveQuery(tablequery);
 			db->SaveQuery(query);
+		}
+		else {
+			db->ConnectToDB();
 		}
 	
 	}
