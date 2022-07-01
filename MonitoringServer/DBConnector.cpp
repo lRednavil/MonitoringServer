@@ -58,6 +58,11 @@ int CDBConnector::SelectQuery(char* query)
 	DWORD startTime = timeGetTime();
 	DWORD endTime;
 	int ret = 0;
+
+	if (connection == NULL) {
+		return -1;
+	}
+
 	query_stat = mysql_query(connection, query);
 
 	if (query_stat != 0)
@@ -88,6 +93,10 @@ int CDBConnector::SaveQuery(char* query)
 	DWORD startTime = timeGetTime();
 	DWORD endTime;
 	int ret = 0;
+	if (connection == NULL) {
+		return -1;
+	}
+
 	query_stat = mysql_query(connection, query);
 
 	if (query_stat != 0)
